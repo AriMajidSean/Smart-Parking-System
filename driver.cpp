@@ -2,52 +2,61 @@
  * driver.cpp
  */
 
-#include <Arduino.h>
 #include "smart_parking.h"
+#include <iostream>
+#include <cmath>
 
-// tells the microcontroller which pin sends or recieves information
-void setup()
+Driver::Driver(int id, double b, double coor1, double coor2)
+    : userID(id), balance(b)
 {
-    pinMode(trigPin, OUTPUT);
-    pinMode(echoPin, INPUT);
+    coordinates[0] = coor1;
+    coordinates[1] = coor2;
+}
+Driver::~Driver() {}
+
+void Driver::parkIn(ParkingLot lot, int spot)
+{
+    ParkedIn = lot;
+    spotID = spot;
+    balance -= lot.getFee();
 }
 
-// function that returns the distance an object is from the ultrasonic sensor
-float measuredDistance(int trigPin, int echoPin)
+void Driver::leaveParkingLot()
 {
-    // clears the trigPin
-    digitalWrite(trigPin, LOW);
-    delayMicroseconds(2);
+    ParkedIn = ParkingLot();
+    spotID = -1;
+}
 
-    // sends a pulse
-    digitalWrite(trigPin, HIGH);
-    delayMircroseconds(10);
-    digitalWrite(trigPin, LOW);
-
-    // measures the time it took for the singal to return
-    int duration = pulseIn(echoPin, HIGH);
-
-    // calculates the distance in cm: (duration * speed of sound) / 2
-    float distance = duration * 0.0343 / 2;
-    return distance;
+double* Driver::getCoordinates()
+{
+    return coordinates;
 }
 
 /**
  * Find distance between two coordinates
+ * @param coor1 First coordinate [X, Y]
+ * @param coor2 Second coordinate [X, Y]
+ * @return Distance between the two coordinates
  */
 inline double find_coor_distance(double coor1[], double coor2[])
 {
-    return sqrt(pow((coor1[0] - coor2[0]), 2) + pow((coor1[1] - coor2[1]), 2))
+    return sqrt(pow((coor1[0] - coor2[0]), 2) + pow((coor1[1] - coor2[1]), 2));
 }
 
-void list_parking_areas(Driver user, ParkingAreas registry[], int num_of_lots)
+/**
+ * List parking areas in the vicinity of the driver
+ * @param user Driver struct of the user
+ * @param registry Array of ParkingLot structs
+ * @param num_of_lots Number of parking lots in the registry
+ */
+void list_parking_areas(Driver user, ParkingLot registry[], int num_of_lots)
 {
     cout << "-- List of Parking Lots/Garages in your area --" << endl;
 
-    for (int i = 0; i < num_of_lots; i++;)
+    for (int i = 0; i < num_of_lots; i++)
     {
-        cout << endl << registry[i].name << ": " << registery[i].address << endl
-             << "Fee: $" << registery[i].fee << " for " << (registry[i].time_limit / 60) << " hours and " << ((registry[i].time_limit % 60)) << " minutes" << endl
-             << "Distance: " << find_coor_distance(user.coordinates, registry[i].coordinates) << endl;
+        cout << endl << registry[i].getName() << ": " << registry[i].getAddress() << endl
+             << "Fee: $" << registry[i].getFee() << " for " << (registry[i].getTimeLimit() / 60) << " hours and " << ((registry[i].getTimeLimit() % 60)) << " minutes" << endl
+             << "Distance: " << find_coor_distance(user.getCoordinates(), registry[i].getCoordinates()) << endl;
     }
 }
