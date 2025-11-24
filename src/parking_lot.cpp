@@ -4,6 +4,8 @@
 
 #include "smart_parking.h"
 
+int ParkingLot::lot_count = 0;
+
 ParkingLot::ParkingLot(string n, int ts, float f, int tl, string ad, double coor1, double coor2)
     : name(n), total_spots(ts), fee(f), time_limit(tl), address(ad)
 {

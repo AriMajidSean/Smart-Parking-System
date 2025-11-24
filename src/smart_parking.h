@@ -34,7 +34,6 @@ public:
     ~ParkingLot();
     int getTotalSpots() const;
     float getFee() const;
-    float getFee() const;
     int getTimeLimit() const;
     string getName() const;
     string getAddress() const;
