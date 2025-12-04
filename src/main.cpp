@@ -35,11 +35,11 @@ void loop() {
   myLot.updateSpotStatus(spot.spotID, spot.isOccupied);
 
   // print results to Serial monitor
-  Serial.print("Spot: ");
-  Serial.print(spot.isOccupied ? "OCCUPIED" : "EMPTY");
-  Serial.print(" | Distance: ");
-  Serial.println(d);
+  Serial.print("{\"occupied\": ");
+  Serial.print(spot.isOccupied ? "true" : "false");
+  Serial.println("}");
 
-  // repeat every second
-  delay(1000);
+  Serial.flush();
+
+  delay(200);
 }

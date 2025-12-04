@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Smart Parking Dashboard</title>
+
+<style>
+body { text-align: center; font-family: Arial; }
+
+#lot {
+    position: relative;
+    display: inline-block;
+}
+
+#spot1 {
+    position: absolute;
+    top: 330px;
+    left: 290px; 
+    width: 95px;
+    height: 170px;
+    opacity: 0.55;
+    background: green;
+}
+</style>
+
+</head>
+<body>
+
+<h1>Smart Parking Dashboard</h1>
+
+<button id="connect">Connect to Arduino</button>
+
+<div id="lot">
+    <img src="parking_lot_image.png" width="800">
+    <div id="spot1"></div>
+</div>
+
+<script>
+let port;
+let reader;
+
+document.getElementById("connect").onclick = async () => {
+    port = await navigator.serial.requestPort();
+    await port.open({ baudRate: 9600 });
+
+    reader = port.readable.getReader();
+    const decoder = new TextDecoder();
+
+    let buffer = "";
+
+    while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        if (!value) continue;
+
+        const text = decoder.decode(value);
+        buffer += text;
+
+        let start, end;
+
+        // Extract ALL complete JSON objects
+        while ((start = buffer.indexOf("{")) !== -1 &&
+               (end = buffer.indexOf("}", start)) !== -1) {
+
+            // Full JSON message found
+            const jsonString = buffer.slice(start, end + 1);
+            buffer = buffer.slice(end + 1);
+
+            try {
+                const data = JSON.parse(jsonString);
+
+                document.getElementById("spot1").style.background =
+                    data.occupied ? "red" : "green";
+            } catch (e) {
+                console.warn("Invalid JSON received:", jsonString);
+            }
+        }
+    }
+};
+</script>
+
+</body>
+</html>
